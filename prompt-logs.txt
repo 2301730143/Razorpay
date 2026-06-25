@@ -1,0 +1,67 @@
+Prompt 1:
+read this very breifly and give me full plan of how to make it,start it by building the schema,then we will focus on api and then make rest plan accordingly
+
+Prompt 2:
+in the first step i want visual schema and then we will work on api
+
+Prompt 3:
+now work on API designs and requirements ,first start with the authentication part
+
+Prompt 4:
+now work on role and management
+
+Prompt 5:
+telll about what tasks completed and what are left
+
+Prompt 6:
+now work on reimbursements
+
+Prompt 7:
+now work on Reimbursements
+POST /rest/reimbursements (EMP only) -> Raise a reimbursement.
+PATCH /rest/reimbursements (RM, APE, CFO) -> Approve or reject.
+Note: The request body contains userId (of the target reimbursement owner) and status. If multiple pending reimbursements exist for a user, we will handle updating the relevant one or support standard parameter identification. We'll clarify this/ensure robust handling.
+GET /rest/reimbursements -> List based on roles.
+GET /rest/reimbursements/<user-id> -> List subordinate's reimbursements
+
+Prompt 8:
+yes
+
+Prompt 9:
+now do automated tests
+
+Prompt 10:
+now do manual verification
+
+Prompt 11:
+open on browser
+
+Prompt 12:
+open on browser
+
+Prompt 13:
+where is routes
+
+Prompt 14:
+make it seperate
+
+Prompt 15:
+make routes and jwt.verify
+
+Prompt 16:
+check if my project meets everything mentioned in this,it should strictly follow this,tell me what things it is missing and what things needs to be corrected
+
+Prompt 17:
+give me a list of pointers that need to be corrected
+
+Prompt 18:
+Remove employeeId from GET /rest/reimbursements Response: File: src/routes/reimbursements.js
+
+Prompt 19:
+Hardcode Port to 7002: File: src/app.js
+
+Prompt 20:
+Handle Ambiguous Request Body for Employee Assignment: File: src/routes/employees.js
+
+Prompt 21:
+Update prompt-logs.txt: File: prompt-logs.txt
