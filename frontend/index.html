@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reimbursements Hub — A role-based reimbursement management system for organizations.">
+  <title>Reimbursements Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #060913;
+      --bg-surface: #0d1117;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(139, 92, 246, 0.6);
+      --accent: #8b5cf6;
+      --accent-2: #06b6d4;
+      --accent-glow: rgba(139, 92, 246, 0.2);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.1);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --info: #3b82f6;
+      --info-bg: rgba(59, 130, 246, 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 15% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+    }
+    .hidden { display: none !important; }
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .5px; text-transform: uppercase;
+    }
+    .badge-emp  { background: var(--info-bg);     color: var(--info);    border: 1px solid rgba(59,130,246,.25); }
+    .badge-rm   { background: var(--warning-bg);  color: var(--warning); border: 1px solid rgba(245,158,11,.25); }
+    .badge-ape  { background: var(--success-bg);  color: var(--success); border: 1px solid rgba(16,185,129,.25); }
+    .badge-cfo  { background: var(--accent-glow); color: var(--accent);  border: 1px solid rgba(139,92,246,.25); }
+    .badge-pending  { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245,158,11,.25); }
+    .badge-approved { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16,185,129,.25); }
+    .badge-rejected { background: var(--danger-bg);  color: var(--danger);  border: 1px solid rgba(239,68,68,.25); }
+
+    /* HEADER */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      background: rgba(6, 9, 19, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.1rem; font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #06b6d4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px 6px 8px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 99px; font-size: 13px; color: var(--text-secondary);
+    }
+    .user-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 9px 18px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600; border: none; cursor: pointer;
+      transition: all 0.2s ease; text-decoration: none; white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: #fff; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.55); transform: translateY(-1px); }
+    .btn-secondary { background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+    .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+    .btn-danger:hover { background: rgba(239,68,68,.2); }
+    .btn-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16,185,129,.3); }
+    .btn-success:hover { background: rgba(16,185,129,.2); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-full { width: 100%; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    /* FORMS */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-secondary); text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; padding: 10px 14px;
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text-primary);
+      font-size: 14px; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s; outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--border-focus); background: rgba(139,92,246,.05); }
+    .form-group select option { background: #1e1e2e; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
+    /* ALERTS */
+    .alert {
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; margin-top: 12px; display: none;
+    }
+    .alert-error   { background: var(--danger-bg);  color: var(--danger);  border: 1px solid rgba(239,68,68,.25); }
+    .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16,185,129,.25); }
+
+    /* AUTH PAGE */
+    #auth-page {
+      min-height: 100vh; display: flex;
+      align-items: center; justify-content: center; padding: 2rem;
+    }
+    .auth-container { width: 100%; max-width: 420px; }
+    .auth-logo { text-align: center; margin-bottom: 2rem; }
+    .auth-logo h1 {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #06b6d4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .auth-logo p { color: var(--text-secondary); font-size: 13px; margin-top: 6px; }
+    .auth-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 2rem;
+      backdrop-filter: blur(20px); box-shadow: var(--shadow);
+    }
+    .auth-tabs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+      background: rgba(255,255,255,.04); padding: 4px;
+      border-radius: var(--radius-sm); margin-bottom: 1.5rem;
+    }
+    .auth-tab {
+      padding: 8px; text-align: center; font-size: 13px;
+      font-weight: 600; color: var(--text-muted); cursor: pointer;
+      border-radius: 6px; transition: all 0.2s;
+    }
+    .auth-tab.active { background: var(--accent); color: #fff; }
+
+    /* DASHBOARD */
+    #app-page { display: none; min-height: 100vh; }
+    .app-layout { display: flex; height: calc(100vh - 64px); }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--bg-surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 1.25rem 0.75rem; gap: 4px; overflow-y: auto;
+    }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 0.5rem 0.75rem; margin-top: 0.5rem;
+    }
+    .sidebar-label:first-child { margin-top: 0; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+    }
+    .nav-item:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+    .nav-item.active {
+      background: var(--accent-glow); color: var(--accent);
+      border-color: rgba(139,92,246,.25);
+    }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+    /* MAIN */
+    .main-content { flex: 1; overflow-y: auto; padding: 2rem; }
+    .page-header { margin-bottom: 1.75rem; }
+    .page-header h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
+    .page-header p { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+
+    /* CARDS */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.5rem; backdrop-filter: blur(8px);
+    }
+    .card-title {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* GRID */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* STATS */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem; transition: all 0.2s;
+    }
+    .stat-card:hover { border-color: rgba(139,92,246,.3); transform: translateY(-2px); }
+    .stat-value {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #06b6d4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 10px 14px; color: var(--text-muted);
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .5px; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    td {
+      padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.04);
+      color: var(--text-secondary); vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    .amount-cell { font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-size: 14px; }
+
+    /* SPINNER */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.15);
+      border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      padding: 12px 20px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; min-width: 260px; max-width: 360px;
+      box-shadow: var(--shadow); animation: slideIn 0.3s ease;
+      display: flex; align-items: center; gap: 10px;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+    .toast-success { background: #052e16; color: #4ade80; border: 1px solid rgba(74,222,128,.25); }
+    .toast-error   { background: #1c0a0a; color: #f87171; border: 1px solid rgba(248,113,113,.25); }
+    .toast-info    { background: #0c1a33; color: #60a5fa; border: 1px solid rgba(96,165,250,.25); }
+
+    /* PANELS */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* EMPLOYEE GRID */
+    .employee-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+    .employee-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;
+    }
+    .employee-card:hover { border-color: rgba(139,92,246,.3); transform: translateY(-2px); }
+    .employee-card-header { display: flex; align-items: center; gap: 10px; }
+    .employee-avatar {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .employee-info .name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .employee-info .email { font-size: 12px; color: var(--text-muted); }
+
+    /* STEP LIST */
+    .step-list { display: flex; flex-direction: column; gap: 12px; }
+    .step { display: flex; gap: 12px; align-items: flex-start; }
+    .step-num {
+      background: var(--accent-glow); color: var(--accent);
+      border-radius: 50%; width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .step-text { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- ═══════════════ AUTH PAGE ═══════════════ -->
+<div id="auth-page">
+  <div class="auth-container">
+    <div class="auth-logo">
+      <h1>💼 Reimbursements Hub</h1>
+      <p>Role-based reimbursement management</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="form-login">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" placeholder="you@org.com" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-login" onclick="doLogin()">Sign In</button>
+        <div class="alert" id="alert-login"></div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="form-register" class="hidden">
+        <div class="form-group">
+          <label for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" placeholder="Jane Doe">
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email Address</label>
+          <input type="email" id="reg-email" placeholder="you@org.com">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <input type="password" id="reg-password" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-register" onclick="doRegister()">Create Account</button>
+        <div class="alert" id="alert-register"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP PAGE ═══════════════ -->
+<div id="app-page">
+  <header>
+    <a class="logo" href="#">
+      <div class="logo-icon">💼</div>
+      Reimbursements Hub
+    </a>
+    <div class="header-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="header-avatar">?</div>
+        <span id="header-name">Loading…</span>
+        <span id="header-badge" class="badge"></span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-label">Main</div>
+      <div class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard')">
+        <span class="nav-icon">🏠</span> Dashboard
+      </div>
+      <div class="nav-item emp-only hidden" data-panel="my-reimbursements" onclick="switchPanel('my-reimbursements')">
+        <span class="nav-icon">📋</span> My Requests
+      </div>
+      <div class="nav-item emp-only hidden" data-panel="submit" onclick="switchPanel('submit')">
+        <span class="nav-icon">➕</span> New Request
+      </div>
+      <div class="nav-item approver-only hidden" data-panel="reimbursements" onclick="switchPanel('reimbursements')">
+        <span class="nav-icon">🧾</span> Reimbursements
+      </div>
+      <div class="nav-item approver-only hidden" data-panel="employees" onclick="switchPanel('employees')">
+        <span class="nav-icon">👥</span> Team
+      </div>
+      <div class="sidebar-label cfo-only hidden">Admin</div>
+      <div class="nav-item cfo-only hidden" data-panel="roles" onclick="switchPanel('roles')">
+        <span class="nav-icon">🔑</span> Assign Roles
+      </div>
+      <div class="nav-item cfo-only hidden" data-panel="hierarchy" onclick="switchPanel('hierarchy')">
+        <span class="nav-icon">🌲</span> Reporting Lines
+      </div>
+    </nav>
+
+    <main class="main-content">
+
+      <!-- DASHBOARD -->
+      <div id="panel-dashboard" class="panel active">
+        <div class="page-header">
+          <h2 id="dash-greeting">Welcome back!</h2>
+          <p id="dash-subtitle">Here's what's happening today.</p>
+        </div>
+        <div class="stats-grid" id="dash-stats"></div>
+        <div class="card">
+          <div class="card-title">⚡ Recent Activity</div>
+          <div id="dash-recent"></div>
+        </div>
+      </div>
+
+      <!-- MY REIMBURSEMENTS (EMP) -->
+      <div id="panel-my-reimbursements" class="panel">
+        <div class="page-header">
+          <h2>My Reimbursements</h2>
+          <p>Track the status of all your submitted requests.</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div class="card-title" style="margin-bottom:0;">📋 All Requests</div>
+            <button class="btn btn-secondary btn-sm" onclick="loadMyReimbursements()">↻ Refresh</button>
+          </div>
+          <div id="my-reimb-content"><div class="empty-state"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
+      <!-- SUBMIT (EMP) -->
+      <div id="panel-submit" class="panel">
+        <div class="page-header">
+          <h2>New Reimbursement Request</h2>
+          <p>Submit an expense for approval by your manager.</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">📝 Request Details</div>
+            <div class="form-group">
+              <label for="sub-title">Title</label>
+              <input type="text" id="sub-title" placeholder="e.g. Laptop stand purchase">
+            </div>
+            <div class="form-group">
+              <label for="sub-desc">Description</label>
+              <textarea id="sub-desc" placeholder="Briefly describe the expense…"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="sub-amount">Amount (₹)</label>
+              <input type="number" id="sub-amount" placeholder="0.00" min="0" step="0.01">
+            </div>
+            <button class="btn btn-primary btn-full" id="btn-submit-reimb" onclick="submitReimbursement()">Submit Request</button>
+            <div class="alert" id="alert-submit"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">ℹ️ How It Works</div>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px;">Your request goes through this approval workflow:</p>
+            <div class="step-list">
+              <div class="step"><div class="step-num">1</div><div class="step-text">You submit the request — status becomes <strong style="color:var(--warning)">PENDING</strong></div></div>
+              <div class="step"><div class="step-num">2</div><div class="step-text">Your Reporting Manager (RM) reviews and approves or rejects</div></div>
+              <div class="step"><div class="step-num">3</div><div class="step-text">An Associate Partner (APE) gives a second approval</div></div>
+              <div class="step"><div class="step-num" style="background:var(--success-bg);color:var(--success);">✓</div><div class="step-text">Both approved? Status becomes <strong style="color:var(--success)">APPROVED</strong></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REIMBURSEMENTS QUEUE (RM/APE/CFO) -->
+      <div id="panel-reimbursements" class="panel">
+        <div class="page-header">
+          <h2>Reimbursements</h2>
+          <p>Review and approve pending requests from your team.</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div class="card-title" style="margin-bottom:0;">📋 Pending Approval Queue</div>
+            <button class="btn btn-secondary btn-sm" onclick="loadReimbursements()">↻ Refresh</button>
+          </div>
+          <div id="reimb-content"><div class="empty-state"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
+      <!-- TEAM / EMPLOYEES -->
+      <div id="panel-employees" class="panel">
+        <div class="page-header">
+          <h2>Team</h2>
+          <p>View your team members and their roles.</p>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div class="card-title" style="margin-bottom:0;">👥 Members</div>
+            <button class="btn btn-secondary btn-sm" onclick="loadEmployees()">↻ Refresh</button>
+          </div>
+          <div id="employees-content"><div class="empty-state"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
+      <!-- ASSIGN ROLES (CFO) -->
+      <div id="panel-roles" class="panel">
+        <div class="page-header">
+          <h2>Assign Roles</h2>
+          <p>Change the role of any user in the system.</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">🔑 Role Assignment</div>
+            <div class="form-group">
+              <label for="role-user-select">Select User</label>
+              <select id="role-user-select"><option value="">-- Choose a user --</option></select>
+            </div>
+            <div class="form-group">
+              <label for="role-select">Assign Role</label>
+              <select id="role-select">
+                <option value="">-- Choose a role --</option>
+                <option value="EMP">EMP — Employee</option>
+                <option value="RM">RM — Reporting Manager</option>
+                <option value="APE">APE — Associate Partner</option>
+                <option value="CFO">CFO — Chief Financial Officer</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="assignRole()">Assign Role</button>
+            <div class="alert" id="alert-roles"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">👤 All Users</div>
+            <div id="all-users-list"><div class="empty-state"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTING LINES (CFO) -->
+      <div id="panel-hierarchy" class="panel">
+        <div class="page-header">
+          <h2>Reporting Lines</h2>
+          <p>Assign employees to reporting managers or remove existing assignments.</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">🔗 Assign Employee to Manager</div>
+            <div class="form-group">
+              <label for="hier-emp-select">Select Employee (EMP)</label>
+              <select id="hier-emp-select"><option value="">-- Choose an employee --</option></select>
+            </div>
+            <div class="form-group">
+              <label for="hier-rm-select">Select Reporting Manager (RM)</label>
+              <select id="hier-rm-select"><option value="">-- Choose a manager --</option></select>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary" style="flex:1" onclick="assignHierarchy()">Assign</button>
+              <button class="btn btn-danger" style="flex:1" onclick="removeHierarchy()">Remove</button>
+            </div>
+            <div class="alert" id="alert-hierarchy"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🌲 Current Assignments</div>
+            <div id="hierarchy-list"><div class="empty-state"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+let currentUser = null;
+
+// ── Utilities ────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span>${{success:'✅',error:'❌',info:'ℹ️'}[type]}</span> ${msg}`;
+  tc.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function showAlert(id, msg, isError = true) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `alert ${isError ? 'alert-error' : 'alert-success'}`;
+  el.style.display = 'block';
+}
+
+function hideAlert(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  const data = await res.json();
+  // Auto-logout on session expiry
+  if (res.status === 401 && currentUser) {
+    currentUser = null;
+    document.getElementById('auth-page').style.display = 'flex';
+    document.getElementById('app-page').style.display = 'none';
+    toast('Session expired. Please sign in again.', 'error');
+  }
+  return data;
+}
+
+function getRoleBadge(role) {
+  const map = { EMP: 'badge-emp', RM: 'badge-rm', APE: 'badge-ape', CFO: 'badge-cfo' };
+  return `<span class="badge ${map[role] || ''}">${role}</span>`;
+}
+
+function getStatusBadge(s) {
+  const map = { PENDING: 'badge-pending', APPROVED: 'badge-approved', REJECTED: 'badge-rejected' };
+  return `<span class="badge ${map[s] || ''}">${s}</span>`;
+}
+
+function initials(name) {
+  return (name || '?').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function fmtAmount(n) {
+  return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab !== 'login');
+  hideAlert('alert-login');
+  hideAlert('alert-register');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showAlert('alert-login', 'Please fill in all fields.');
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Signing in…';
+  try {
+    // POST /rest/onboardings/login — returns { status, data: { userId, name, email, role } }
+    const data = await api('/rest/onboardings/login', { method: 'POST', body: { email, password } });
+    if (data.status === 'success') {
+      currentUser = data.data;
+      initApp();
+    } else {
+      showAlert('alert-login', data.message || 'Login failed.');
+    }
+  } catch {
+    showAlert('alert-login', 'Network error. Is the server running?');
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Sign In';
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) return showAlert('alert-register', 'Please fill in all fields.');
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creating…';
+  try {
+    // POST /rest/onboardings/register — creates new EMP user
+    const data = await api('/rest/onboardings/register', { method: 'POST', body: { name, email, password } });
+    if (data.status === 'success') {
+      showAlert('alert-register', 'Account created! You can now sign in.', false);
+      setTimeout(() => switchTab('login'), 1500);
+    } else {
+      showAlert('alert-register', data.message || 'Registration failed.');
+    }
+  } catch {
+    showAlert('alert-register', 'Network error.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Create Account';
+}
+
+async function doLogout() {
+  // POST /rest/onboardings/logout — clears the httpOnly cookie
+  await api('/rest/onboardings/logout', { method: 'POST' });
+  currentUser = null;
+  document.getElementById('auth-page').style.display = 'flex';
+  document.getElementById('app-page').style.display = 'none';
+  toast('Signed out.', 'info');
+}
+
+// ── App Init ─────────────────────────────────────────────────────────────────
+function initApp() {
+  const { role, name } = currentUser;
+  document.getElementById('auth-page').style.display = 'none';
+  document.getElementById('app-page').style.display = 'block';
+  document.getElementById('header-name').textContent = name;
+  document.getElementById('header-avatar').textContent = initials(name);
+  const hb = document.getElementById('header-badge');
+  hb.textContent = role;
+  hb.className = `badge badge-${role.toLowerCase()}`;
+  document.getElementById('dash-greeting').textContent = `Welcome back, ${name.split(' ')[0]}!`;
+  document.getElementById('dash-subtitle').textContent = `Signed in as ${role}.`;
+
+  const isEMP = role === 'EMP';
+  const isCFO = role === 'CFO';
+  document.querySelectorAll('.emp-only').forEach(el => el.classList.toggle('hidden', !isEMP));
+  document.querySelectorAll('.approver-only').forEach(el => el.classList.toggle('hidden', isEMP));
+  document.querySelectorAll('.cfo-only').forEach(el => el.classList.toggle('hidden', !isCFO));
+
+  switchPanel('dashboard');
+  loadDashboard();
+  toast(`Welcome, ${name.split(' ')[0]}! 👋`, 'success');
+}
+
+// ── Panel Navigation ──────────────────────────────────────────────────────────
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const p = document.getElementById(`panel-${name}`);
+  if (p) p.classList.add('active');
+  const n = document.querySelector(`[data-panel="${name}"]`);
+  if (n) n.classList.add('active');
+
+  if (name === 'my-reimbursements') loadMyReimbursements();
+  if (name === 'reimbursements') loadReimbursements();
+  if (name === 'employees') loadEmployees();
+  if (name === 'roles') loadRolesPanel();
+  if (name === 'hierarchy') loadHierarchyPanel();
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  const statsEl = document.getElementById('dash-stats');
+  const recentEl = document.getElementById('dash-recent');
+  recentEl.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    // GET /rest/reimbursements — role-aware: EMP gets own, others get queue
+    const data = await api('/rest/reimbursements');
+    if (data.status !== 'success') {
+      recentEl.innerHTML = '<div class="empty-state"><p>Failed to load data.</p></div>';
+      return;
+    }
+    const reimbs = data.data?.reimbursements || [];
+    if (currentUser.role === 'EMP') {
+      const pending  = reimbs.filter(r => r.status === 'PENDING').length;
+      const approved = reimbs.filter(r => r.status === 'APPROVED').length;
+      const total    = reimbs.reduce((s, r) => s + r.amount, 0);
+      statsEl.innerHTML = `
+        <div class="stat-card"><div class="stat-value">${reimbs.length}</div><div class="stat-label">Total Requests</div></div>
+        <div class="stat-card"><div class="stat-value">${pending}</div><div class="stat-label">Pending</div></div>
+        <div class="stat-card"><div class="stat-value">${approved}</div><div class="stat-label">Approved</div></div>
+        <div class="stat-card"><div class="stat-value">${fmtAmount(total)}</div><div class="stat-label">Total Value</div></div>
+      `;
+    } else {
+      statsEl.innerHTML = `<div class="stat-card"><div class="stat-value">${reimbs.length}</div><div class="stat-label">Awaiting Review</div></div>`;
+    }
+    const showActions = currentUser.role !== 'EMP';
+    recentEl.innerHTML = reimbs.length
+      ? buildReimbTable(reimbs.slice(0, 5), showActions)
+      : `<div class="empty-state"><div class="empty-icon">${currentUser.role === 'EMP' ? '📭' : '🎉'}</div><p>${currentUser.role === 'EMP' ? 'No requests yet.' : 'All clear! No pending items.'}</p></div>`;
+  } catch {
+    recentEl.innerHTML = '<div class="empty-state"><p>Failed to load data.</p></div>';
+  }
+}
+
+// ── Reimbursement Table ───────────────────────────────────────────────────────
+// Backend now returns: id, employee_id, title, description, amount, status
+function buildReimbTable(reimbs, showActions) {
+  const rows = reimbs.map(r => `
+    <tr>
+      <td style="color:var(--text-primary);font-weight:500;">${r.title}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.description}</td>
+      <td class="amount-cell">${fmtAmount(r.amount)}</td>
+      <td>${getStatusBadge(r.status)}</td>
+      ${showActions ? `<td>${r.status === 'PENDING'
+        ? `<div style="display:flex;gap:6px;">
+             <button class="btn btn-success btn-sm" onclick="reviewReimb('${r.id}','APPROVED')">Approve</button>
+             <button class="btn btn-danger btn-sm" onclick="reviewReimb('${r.id}','REJECTED')">Reject</button>
+           </div>`
+        : '—'}</td>` : ''}
+    </tr>`).join('');
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Title</th><th>Description</th><th>Amount</th><th>Status</th>${showActions ? '<th>Action</th>' : ''}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+// GET /rest/reimbursements — EMP: own requests
+async function loadMyReimbursements() {
+  const el = document.getElementById('my-reimb-content');
+  el.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    const data = await api('/rest/reimbursements');
+    if (data.status !== 'success') { el.innerHTML = '<div class="empty-state"><p>Failed to load.</p></div>'; return; }
+    const reimbs = data.data?.reimbursements || [];
+    el.innerHTML = reimbs.length
+      ? buildReimbTable(reimbs, false)
+      : '<div class="empty-state"><div class="empty-icon">📭</div><p>No requests submitted yet.</p></div>';
+  } catch { el.innerHTML = '<div class="empty-state"><p>Network error.</p></div>'; }
+}
+
+// GET /rest/reimbursements — RM/APE/CFO: approval queue
+async function loadReimbursements() {
+  const el = document.getElementById('reimb-content');
+  el.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    const data = await api('/rest/reimbursements');
+    if (data.status !== 'success') { el.innerHTML = '<div class="empty-state"><p>Failed to load.</p></div>'; return; }
+    const reimbs = data.data?.reimbursements || [];
+    el.innerHTML = reimbs.length
+      ? buildReimbTable(reimbs, true)
+      : '<div class="empty-state"><div class="empty-icon">🎉</div><p>No reimbursements awaiting review.</p></div>';
+  } catch { el.innerHTML = '<div class="empty-state"><p>Network error.</p></div>'; }
+}
+
+// PATCH /rest/reimbursements — approve or reject using reimbursementId (UUID)
+async function reviewReimb(reimbId, status) {
+  if (!reimbId) { toast('Missing reimbursement ID.', 'error'); return; }
+  const data = await api('/rest/reimbursements', {
+    method: 'PATCH',
+    body: { reimbursementId: reimbId, status }
+  });
+  if (data.status === 'success') {
+    toast(data.message, 'success');
+    loadReimbursements();
+    loadDashboard();
+  } else {
+    toast(data.message || 'Action failed.', 'error');
+  }
+}
+
+// POST /rest/reimbursements — EMP submits new reimbursement
+async function submitReimbursement() {
+  const title       = document.getElementById('sub-title').value.trim();
+  const description = document.getElementById('sub-desc').value.trim();
+  const amount      = parseFloat(document.getElementById('sub-amount').value);
+  if (!title || !description || isNaN(amount) || amount <= 0)
+    return showAlert('alert-submit', 'Please fill in all fields with valid values.');
+  const btn = document.getElementById('btn-submit-reimb');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting…';
+  try {
+    const data = await api('/rest/reimbursements', { method: 'POST', body: { title, description, amount } });
+    if (data.status === 'success') {
+      showAlert('alert-submit', 'Request submitted successfully!', false);
+      document.getElementById('sub-title').value = '';
+      document.getElementById('sub-desc').value = '';
+      document.getElementById('sub-amount').value = '';
+      toast('Reimbursement submitted!', 'success');
+      loadDashboard();
+    } else {
+      showAlert('alert-submit', data.message || 'Failed to submit.');
+    }
+  } catch { showAlert('alert-submit', 'Network error.'); }
+  btn.disabled = false;
+  btn.innerHTML = 'Submit Request';
+}
+
+// ── Team / Employees ──────────────────────────────────────────────────────────
+// GET /rest/employees — role-filtered: RM→own EMPs, APE→EMPs+RMs, CFO→everyone
+async function loadEmployees() {
+  const el = document.getElementById('employees-content');
+  el.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    const data = await api('/rest/employees');
+    if (data.status !== 'success') { el.innerHTML = '<div class="empty-state"><p>Failed to load.</p></div>'; return; }
+    const users = data.data?.users || [];
+    if (!users.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>No team members found.</p></div>'; return; }
+    el.innerHTML = `<div class="employee-grid">${users.map(u => `
+      <div class="employee-card">
+        <div class="employee-card-header">
+          <div class="employee-avatar">${initials(u.name)}</div>
+          <div class="employee-info">
+            <div class="name">${u.name}</div>
+            <div class="email">${u.email}</div>
+          </div>
+        </div>
+        ${getRoleBadge(u.role)}
+      </div>`).join('')}</div>`;
+  } catch { el.innerHTML = '<div class="empty-state"><p>Network error.</p></div>'; }
+}
+
+// ── Assign Roles (CFO only) ───────────────────────────────────────────────────
+async function loadRolesPanel() {
+  try {
+    // GET /rest/employees — CFO sees all users (returns userId, name, email, role)
+    const data = await api('/rest/employees');
+    if (data.status !== 'success') return;
+    const users = data.data?.users || [];
+
+    const sel = document.getElementById('role-user-select');
+    sel.innerHTML = '<option value="">-- Choose a user --</option>' +
+      users.map(u => `<option value="${u.userId}">${u.name} (${u.role})</option>`).join('');
+
+    const el = document.getElementById('all-users-list');
+    if (!users.length) { el.innerHTML = '<div class="empty-state"><p>No users found.</p></div>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+      <tbody>${users.map(u => `
+        <tr>
+          <td style="color:var(--text-primary);font-weight:500;">${u.name}</td>
+          <td>${u.email}</td>
+          <td>${getRoleBadge(u.role)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+  } catch { /* silent */ }
+}
+
+// POST /rest/roles/assign — CFO assigns a role { userId, role }
+async function assignRole() {
+  const userId = document.getElementById('role-user-select').value;
+  const role   = document.getElementById('role-select').value;
+  if (!userId || !role) return showAlert('alert-roles', 'Select a user and a role.');
+  const data = await api('/rest/roles/assign', { method: 'POST', body: { userId, role } });
+  if (data.status === 'success') {
+    showAlert('alert-roles', 'Role assigned successfully!', false);
+    toast('Role updated!', 'success');
+    loadRolesPanel();
+  } else {
+    showAlert('alert-roles', data.message || 'Failed.');
+  }
+}
+
+// ── Reporting Lines (CFO only) ────────────────────────────────────────────────
+async function loadHierarchyPanel() {
+  try {
+    // GET /rest/employees — CFO gets all users with manager_id field
+    const data = await api('/rest/employees');
+    if (data.status !== 'success') return;
+    const users = data.data?.users || [];
+
+    const emps = users.filter(u => u.role === 'EMP');
+    const rms  = users.filter(u => u.role === 'RM');
+
+    document.getElementById('hier-emp-select').innerHTML =
+      '<option value="">-- Choose an employee --</option>' +
+      emps.map(u => `<option value="${u.userId}">${u.name}</option>`).join('');
+
+    document.getElementById('hier-rm-select').innerHTML =
+      '<option value="">-- Choose a manager --</option>' +
+      rms.map(u => `<option value="${u.userId}">${u.name}</option>`).join('');
+
+    const el = document.getElementById('hierarchy-list');
+    const assigned = emps.filter(u => u.manager_id);
+    if (!assigned.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">🌲</div><p>No assignments yet.</p></div>';
+      return;
+    }
+    el.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Employee</th><th>Reporting Manager</th></tr></thead>
+      <tbody>${assigned.map(u => {
+        const mgr = rms.find(r => r.userId === u.manager_id);
+        return `<tr><td style="color:var(--text-primary)">${u.name}</td><td>${mgr ? mgr.name : '—'}</td></tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+  } catch { /* silent */ }
+}
+
+// POST /rest/employees/assign — CFO assigns EMP to RM { employeeId, managerId }
+async function assignHierarchy() {
+  const employeeId = document.getElementById('hier-emp-select').value;
+  const managerId  = document.getElementById('hier-rm-select').value;
+  if (!employeeId || !managerId) return showAlert('alert-hierarchy', 'Select both an employee and a manager.');
+  const data = await api('/rest/employees/assign', { method: 'POST', body: { employeeId, managerId } });
+  if (data.status === 'success') {
+    showAlert('alert-hierarchy', 'Assigned!', false);
+    toast('Reporting line set!', 'success');
+    loadHierarchyPanel();
+  } else {
+    showAlert('alert-hierarchy', data.message || 'Failed.');
+  }
+}
+
+// DELETE /rest/employees/assign — CFO removes EMP→RM assignment { employeeId, managerId }
+async function removeHierarchy() {
+  const employeeId = document.getElementById('hier-emp-select').value;
+  const managerId  = document.getElementById('hier-rm-select').value;
+  if (!employeeId || !managerId) return showAlert('alert-hierarchy', 'Select both to remove.');
+  const data = await api('/rest/employees/assign', { method: 'DELETE', body: { employeeId, managerId } });
+  if (data.status === 'success') {
+    showAlert('alert-hierarchy', 'Removed!', false);
+    toast('Assignment removed.', 'info');
+    loadHierarchyPanel();
+  } else {
+    showAlert('alert-hierarchy', data.message || 'Failed.');
+  }
+}
+
+// ── Keyboard Shortcuts ────────────────────────────────────────────────────────
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('reg-password').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+</script>
+</body>
+</html>

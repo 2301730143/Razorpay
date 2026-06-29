@@ -155,7 +155,7 @@ router.get('/', authenticate, async (req, res) => {
     if (role === 'EMP') {
       // lists their own reimbursements
       queryText = `
-        SELECT title, description, amount, status 
+        SELECT id, employee_id, title, description, amount, status 
         FROM reimbursements 
         WHERE employee_id = $1
         ORDER BY created_at DESC
@@ -164,7 +164,7 @@ router.get('/', authenticate, async (req, res) => {
     } else if (role === 'RM') {
       // sees the reimbursements that are PENDING from their EMPs
       queryText = `
-        SELECT r.title, r.description, r.amount, r.status
+        SELECT r.id, r.employee_id, r.title, r.description, r.amount, r.status
         FROM reimbursements r
         JOIN users u ON r.employee_id = u.id
         WHERE u.manager_id = $1 
@@ -179,7 +179,7 @@ router.get('/', authenticate, async (req, res) => {
     } else if (role === 'APE') {
       // sees reimbursements PENDING at the APE level but already APPROVED by the RM
       queryText = `
-        SELECT DISTINCT r.title, r.description, r.amount, r.status
+        SELECT DISTINCT r.id, r.employee_id, r.title, r.description, r.amount, r.status
         FROM reimbursements r
         JOIN reimbursement_approvals ra ON r.id = ra.reimbursement_id
         WHERE r.status = 'PENDING' 
@@ -195,7 +195,7 @@ router.get('/', authenticate, async (req, res) => {
     } else if (role === 'CFO') {
       // sees reimbursements already APPROVED by the APEs
       queryText = `
-        SELECT DISTINCT r.title, r.description, r.amount, r.status
+        SELECT DISTINCT r.id, r.employee_id, r.title, r.description, r.amount, r.status
         FROM reimbursements r
         JOIN reimbursement_approvals ra ON r.id = ra.reimbursement_id
         WHERE ra.approver_role = 'APE' AND ra.decision = 'APPROVED'
@@ -254,7 +254,7 @@ router.get('/:userId', authenticate, async (req, res) => {
     }
 
     const result = await db.query(
-      'SELECT title, description, amount, status FROM reimbursements WHERE employee_id = $1 ORDER BY created_at DESC',
+      'SELECT id, employee_id, title, description, amount, status FROM reimbursements WHERE employee_id = $1 ORDER BY created_at DESC',
       [targetUserId]
     );
 

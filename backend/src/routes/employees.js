@@ -18,7 +18,7 @@ router.get('/', authenticate, async (req, res) => {
     if (role === 'RM') {
       // Lists all the EMPs reporting to them
       queryText = `
-        SELECT id as "userId", name, email, role 
+        SELECT id as "userId", name, email, role, manager_id 
         FROM users 
         WHERE manager_id = $1 AND role = 'EMP'
       `;
@@ -26,14 +26,14 @@ router.get('/', authenticate, async (req, res) => {
     } else if (role === 'APE') {
       // Lists all EMPs and RMs
       queryText = `
-        SELECT id as "userId", name, email, role 
+        SELECT id as "userId", name, email, role, manager_id 
         FROM users 
         WHERE role IN ('EMP', 'RM')
       `;
     } else if (role === 'CFO') {
       // Lists everyone
       queryText = `
-        SELECT id as "userId", name, email, role 
+        SELECT id as "userId", name, email, role, manager_id 
         FROM users
       `;
     }

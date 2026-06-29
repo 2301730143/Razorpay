@@ -89,11 +89,11 @@ const dbMock = {
       const apps = this.approvals.filter(x => x.reimbursement_id === reimbId && x.decision === 'APPROVED');
       return { rows: apps.map(x => ({ approver_role: x.approver_role })) };
     }
-    if (norm.includes('SELECT title, description, amount, status FROM reimbursements WHERE employee_id = $1 ORDER BY created_at DESC')) {
+    if (norm.includes('SELECT id, employee_id, title, description, amount, status FROM reimbursements WHERE employee_id = $1 ORDER BY created_at DESC')) {
       const empId = params[0];
       const rows = Array.from(this.reimbursements.values())
         .filter(r => r.employee_id === empId)
-        .map(r => ({ ...r, amount: parseFloat(r.amount) }))
+        .map(r => ({ id: r.id, employee_id: r.employee_id, title: r.title, description: r.description, amount: parseFloat(r.amount), status: r.status }))
         .sort((a, b) => b.created_at - a.created_at);
       return { rows };
     }
@@ -104,7 +104,7 @@ const dbMock = {
       const rows = Array.from(this.reimbursements.values())
         .filter(r => subIds.includes(r.employee_id) && r.status === 'PENDING')
         .filter(r => !this.approvals.some(ap => ap.reimbursement_id === r.id && ap.approver_id === rmId))
-        .map(r => ({ ...r, employeeId: r.employee_id, amount: parseFloat(r.amount) }))
+        .map(r => ({ id: r.id, employee_id: r.employee_id, title: r.title, description: r.description, amount: parseFloat(r.amount), status: r.status }))
         .sort((a, b) => b.created_at - a.created_at);
       return { rows };
     }
@@ -114,19 +114,19 @@ const dbMock = {
         .filter(r => r.status === 'PENDING')
         .filter(r => this.approvals.some(ap => ap.reimbursement_id === r.id && ap.approver_role === 'RM' && ap.decision === 'APPROVED'))
         .filter(r => !this.approvals.some(ap => ap.reimbursement_id === r.id && ap.approver_id === apeId))
-        .map(r => ({ ...r, employeeId: r.employee_id, amount: parseFloat(r.amount) }))
+        .map(r => ({ id: r.id, employee_id: r.employee_id, title: r.title, description: r.description, amount: parseFloat(r.amount), status: r.status }))
         .sort((a, b) => b.created_at - a.created_at);
       return { rows };
     }
     if (norm.includes("ra.approver_role = 'APE'") && norm.includes("ra.decision = 'APPROVED'")) {
       const rows = Array.from(this.reimbursements.values())
         .filter(r => this.approvals.some(ap => ap.reimbursement_id === r.id && ap.approver_role === 'APE' && ap.decision === 'APPROVED'))
-        .map(r => ({ ...r, employeeId: r.employee_id, amount: parseFloat(r.amount) }))
+        .map(r => ({ id: r.id, employee_id: r.employee_id, title: r.title, description: r.description, amount: parseFloat(r.amount), status: r.status }))
         .sort((a, b) => b.amount - a.amount);
       return { rows };
     }
-    if (norm.includes('SELECT id as "userId", name, email, role FROM users')) {
-      const rows = Array.from(this.users.values()).map(u => ({ userId: u.id, name: u.name, email: u.email, role: u.role }));
+    if (norm.includes('SELECT id as "userId", name, email, role')) {
+      const rows = Array.from(this.users.values()).map(u => ({ userId: u.id, name: u.name, email: u.email, role: u.role, manager_id: u.manager_id }));
       return { rows };
     }
 
