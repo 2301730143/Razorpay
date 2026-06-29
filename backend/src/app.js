@@ -6,7 +6,7 @@ require('dotenv').config();
 const path = require('path');
 
 const app = express();
-const PORT = 7002;
+const PORT = process.env.PORT || 7002;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -32,5 +32,5 @@ app.get('*', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server is running strictly on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
